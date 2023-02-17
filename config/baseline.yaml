@@ -1,0 +1,31 @@
+num_clients:
+  - 8
+  - 16
+  - 32
+  - 64 
+  - 128
+
+  # # Many Clients
+  # - 100
+  # - 1000
+  # - 3000
+  # - 5000
+  # - 10000
+dims:
+  - 1e1
+  - 1e2
+  - 1e3
+  - 1e4
+  - 1e5
+  - 1e6
+  - 1e7 
+
+num_trials: 3
+midnight: 2022-06-02
+protocol_name: Baseline_Large
+protocol_location_client: agent.Baseline.BaselineClientAgent
+protocol_location_server: agent.Baseline.BaselineServiceAgent
+default_computation_delay: 5
+params:
+  s_len: 10
+  k: 3

@@ -1,0 +1,25 @@
+num_clients:
+  - 8 
+  - 16 
+  - 32 
+  - 128
+  - 64 
+  
+dims:
+  - 1e1
+  - 1e2
+  - 1e3
+  - 1e4
+  - 1e5
+  # - 1e6
+  # - 1e7
+num_trials: 5
+midnight: 2022-06-02
+protocol_name: Stevens
+protocol_location_client: agent.Stevens.StevensClientAgent
+protocol_location_server: agent.Stevens.StevensServiceAgent
+default_computation_delay: 5
+params:
+  s_len: 710
+  frac_malicious: 0.05
+  packing: true

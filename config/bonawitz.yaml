@@ -1,0 +1,24 @@
+num_clients:
+  - 8
+  - 16
+  - 32
+  - 128 
+  - 64 
+  
+dims:
+  - 1e1
+  - 1e2
+  - 1e3
+  - 1e4
+  - 1e5
+  - 1e6
+  - 1e7 
+num_trials: 4
+midnight: 2022-06-02
+protocol_name: Low_Latency_Bonawitz_final
+protocol_location_client: agent.Bonawitz.BonawitzClientAgent
+protocol_location_server: agent.Bonawitz.BonawitzServiceAgent
+default_computation_delay: 5
+params:
+  s_len: 10
+  k: 3
