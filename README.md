@@ -46,10 +46,10 @@ Config files must be created in the config directory in order to be found by oly
     - Sets the name of your protocol
 - protocol_location_client
     - Sets the location of your protocols client class
-    - Ex: agent.Masking.MaskingClientAgent
+    - Ex: agent.Stevens.StevensClientAgent
 - protocol_location_server
     - Sets the location of your protocols server class
-    - Ex: agent.Masking.MaskingServerAgent
+    - Ex: agent.Stevens.StevensServerAgent
 - default_computation_delay
     - Sets the default computation delay for your simulation
 - params
@@ -67,8 +67,8 @@ dims:
 num_trials: 5
 midnight: 2022-06-02
 protocol_name: Masking
-protocol_location_client: agent.Masking.MaskingClientAgent
-protocol_location_server: agent.Masking.MaskingServiceAgent
+protocol_location_client: agent.Stevens.StevensClientAgent
+protocol_location_server: agent.Stevens.StevensServiceAgent
 default_computation_delay: 5
 params:
   s_len: 710
