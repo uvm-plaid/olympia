@@ -2,11 +2,11 @@
 
 This repository contains the implementation of the Olympia framework for implementing and evaluating secure protocols. It also contains the implementations of several case-study protocols from the paper (in the `agent` directory). The paper describing Olympia is:
 
-- [Olympia: A Simulation Framework for Evaluating the Concrete Scalability of Secure Aggregation Protocols](tbd). Ivoline C. Ngong, Nicholas Gibson, Joseph P. Near.
+- [Olympia: A Simulation Framework for Evaluating the Concrete Scalability of Secure Aggregation Protocols](https://arxiv.org/abs/2302.10084). Ivoline C. Ngong, Nicholas Gibson, Joseph P. Near.
 
 ## Team
 
-Development of the Olympia system is led by [Ivoline C. Ngong](https://ivolinengong.com/) with help from [Nicholas Gibson](https://github.com/NicholasGibsonUVM) and [Joseph P. Near](https://www.uvm.edu/~jnear/).
+Development of the Olympia system is led by [Ivoline C. Ngong](https://ivolinengong.com/) with help from [Nicholas Gibson](https://github.com/NicholasGibsonUVM) and [Joseph P. Near](https://www.uvm.edu/~jnear/). Olympia is built on the [ABIDES Framework](https://github.com/abides-sim/abides).
 
 ## How to Run
 Olympia requires Python >3.8. You can install the dependencies with `pip install -r requirements.txt`.
