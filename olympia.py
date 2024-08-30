@@ -9,10 +9,7 @@ from config.base_config import BaseConfig
 
 if __name__ == '__main__':
 
-  print ("=" * len(system_name))
-  print (system_name)
-  print ("=" * len(system_name))
-  print ()
+  
 
   # Test command line parameters.  Only peel off the config file.
   # Anything else should be left FOR the config file to consume as agent
