@@ -69,17 +69,28 @@ def share_packed(secrets, range_shares, T, K, GF):
     """
     secrets: flat array
     """
-    secrets = reshape(secrets, K, GF)
-    secrets = np.atleast_2d(secrets)
-    p_size = (secrets.shape[0], K + T - 1)
+    if K == 1:
+        n = len(range_shares)
 
-    poly_points = GF.Random((p_size))
-    poly_points[:, :K] = secrets
-    xs = GF.Range(0, p_size[1])
-    polys = [galois.lagrange_poly(xs, pps) for pps in poly_points]
-    shares = {x: ArrayShare(x+K, GF(np.array([poly(x+K) for poly in polys])), T, GF, K=K) \
-              for x in range_shares}
-    return shares
+        polys = []
+        for s in secrets:
+            coefficients = GF([GF.Random() for _ in range(T-1)] + [s])
+            polys.append(galois.Poly(coefficients))
+
+        shares = {x: ArrayShare(x, GF([p(x) for p in polys]), T, GF, K=1) for x in range_shares}
+        return shares
+    else:
+        secrets = reshape(secrets, K, GF)
+        secrets = np.atleast_2d(secrets)
+        p_size = (secrets.shape[0], K + T - 1)
+
+        poly_points = GF.Random((p_size))
+        poly_points[:, :K] = secrets
+        xs = GF.Range(0, p_size[1])
+        polys = [galois.lagrange_poly(xs, pps) for pps in poly_points]
+        shares = {x: ArrayShare(x+K, GF(np.array([poly(x+K) for poly in polys])), T, GF, K=K) \
+                  for x in range_shares}
+        return shares
 
 def share_array(secrets, range_shares, T, GF, K=1):
     """Secret shares an array of secrets. Returns a dict mapping the x coordinate of each share

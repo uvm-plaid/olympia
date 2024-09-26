@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 
 import os, queue, sys
-from message.Message import MessageType
+from olympia.message.Message import MessageType
 
-from util.util import log_print
+from olympia.util.util import log_print
 
 
 class Kernel:

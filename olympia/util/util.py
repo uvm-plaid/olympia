@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 from contextlib import contextmanager
@@ -7,13 +8,17 @@ import pandas as pd
 import networkx as nx
 import geopy.distance
 import warnings
-from message.Message import Message
+from olympia.message.Message import Message
 from nacl.public import PublicKey, EncryptedMessage
+from nacl.signing import SignedMessage
 from galois import Array
 from os.path import exists
 from io import BytesIO
+from olympia.util.merkle_tree import VerificationTree
+from tqdm import tqdm
+import sys
 
-import util.shamir_sharing as shamir
+import olympia.util.shamir_sharing as shamir
 
 # General purpose utility functions for the simulator, attached to no particular class.
 # Available to any agent or other module/utility.  Should not require references to
@@ -176,7 +181,7 @@ def generate_latency_matrix(sub_df):
         sub_df["lon"] = sub_df["geometry"].centroid.x
         sub_df["lat"] = sub_df["geometry"].centroid.y
 
-    for i in range(sub_df.shape[0]):
+    for i in tqdm(range(sub_df.shape[0]), desc="Generating Latency Matix"):
         for j in range(sub_df.shape[0]):
             combined_latency = sub_df['avg_lat_ms'].iloc[i] + sub_df['avg_lat_ms'].iloc[j]
             distanceAB = geopy.distance.geodesic((sub_df['lat'].iloc[i] ,sub_df['lon'].iloc[i] ), (sub_df['lat'].iloc[j],sub_df['lon'].iloc[j] )).km
@@ -207,13 +212,13 @@ def get_msg_size(msg):
     elif isinstance(msg, Message):
         # size of message is size of values (ignore keys)
         return sum([get_msg_size(x) for x in msg.body.values()])
-    elif isinstance(msg, list):
+    elif isinstance(msg, (list, set)):
         # size of list is size of values
         return sum([get_msg_size(x) for x in msg])
     elif isinstance(msg, str):
         # size of string is its length (assume 1 byte encoding)
         return len(msg)
-    elif isinstance(msg, (PublicKey, EncryptedMessage)):
+    elif isinstance(msg, (PublicKey, EncryptedMessage, SignedMessage)):
         return len(bytes(msg))
     elif isinstance(msg, Array):
         return (int(get_bytes_for_int(msg._characteristic)) + 1)*len(msg)
@@ -226,6 +231,8 @@ def get_msg_size(msg):
     elif isinstance(msg, (int, float)):
         # size of int and float is 64 bits
         return 8
+    elif isinstance(msg, VerificationTree):
+        return sys.getsizeof(msg)
 
     raise RuntimeError(f'Failed to compute message size for unknown message of type {type(msg)}: {msg}')
 
@@ -243,18 +250,22 @@ def ns_to_ms(x):
 
 # Build a dict with the results for an experiment
 def build_stats(server, clients, kernel):
-    avgClientComputationTime   = ns_to_ms(np.mean([c.total_computation_time for c in clients]))
+    survived_clients           = server.survived_clients 
+    survived_clients_indices   = list(map(int, survived_clients))
+    survived_clients_list      = [clients[i-1] for i in survived_clients_indices]
+    avgClientComputationTime = ns_to_ms(np.mean([c.total_computation_time for c in survived_clients_list]))
+    # avgClientComputationTimes   = ns_to_ms(np.mean([c.total_computation_time for c in clients]))
     serverComputationTime      = ns_to_ms(server.total_computation_time)
-    #totalTime                  = ns_to_ms((kernel.currentTime - kernel.startTime).total_seconds())
-    totalTime                  = ns_to_ms((kernel.currentTime - kernel.startTime).delta)
+    totalTime                  = (kernel.currentTime - kernel.startTime).total_seconds() * 1000
     avgClientBytesSent         = np.mean([c.total_bytes_sent for c in clients])
     avgClientBytesReceived     = np.mean([c.total_bytes_received for c in clients])
     serverBytesSent            = server.total_bytes_sent
     serverBytesReceived        = server.total_bytes_received
-
     totalDropouts              = server.total_dropouts
     failure                    = server.failure
-    dropout_fraction           = server.dropout_fraction
+    dropoutFraction           = server.total_dropout_fraction
+    serverRoundTimes           = server.server_round_times
+    avgClientRoundRimes        = np.mean([c.client_round_times for c in clients])
 
     return {
         'avg client computation time (ms)': avgClientComputationTime,
@@ -265,8 +276,10 @@ def build_stats(server, clients, kernel):
         'server bytes sent': serverBytesSent,
         'server bytes recieved': serverBytesReceived,
         'total dropouts': totalDropouts,
-        'dropout fraction': dropout_fraction,
-        'failure': failure
+        'dropout fraction': dropoutFraction,
+        'failure': failure,
+        'server round times': serverRoundTimes,
+        'avg client round times': avgClientRoundRimes,
         }
 
 # Write an experiment result to a CSV file
@@ -281,7 +294,9 @@ def write_csv(filename, stats, num_clients, dim, dropout_wait):
         'server bytes recieved',
         'total dropouts',
         'dropout fraction',
-        'failure'
+        'failure',
+        #'server round times',
+        'avg client round times'
         ]
 
     stats_line = ','.join([str(round(stats[f], 2)) for f in stat_fields])
@@ -311,9 +326,10 @@ def bytes_to_array(b: bytes) -> np.ndarray:
 
 def bytes_per_element(GF):
     n = 1
-    while 2**(8*(n)) < GF.characteristic:
+    while 2**(8*(n+1)) < GF.characteristic:
         n += 1
     return n
+
 
 def bytes_to_field_array(b, GF):
     # how many bytes can we encode?

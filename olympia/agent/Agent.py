@@ -1,7 +1,7 @@
 import pandas as pd
 
 from copy import deepcopy
-from util.util import log_print, get_msg_size
+from olympia.util.util import log_print, get_msg_size
 
 class Agent:
 

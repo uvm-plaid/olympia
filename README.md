@@ -10,7 +10,8 @@ Development of the Olympia system is led by [Ivoline C. Ngong](https://ivolineng
 
 ## How to Run
 Olympia requires Python >3.8. You can install the dependencies with `pip install -r requirements.txt`.
-Then, run the olympia.py file and select the config file you would like to use. You can specify the config file using command line arguments as well.
+Then, install the Olympia package with `pip install .`.
+Finally, run the olympia.py file and select the config file you would like to use. You can specify the config file using command line arguments as well.
 
 ### Command Line Arguments
 - -c, --config

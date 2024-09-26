@@ -1,0 +1,50 @@
+num_clients:
+  # - 8 
+   - 16
+  # - 32
+  # - 128
+  # - 64
+
+# Many Clients
+  # - 100
+  # - 1000
+  # - 3000
+  # - 5000
+  #- 10000
+
+dims:
+  # - 1e1
+  - 1e2
+  # - 1e3
+  # - 1e4
+  # - 1e5
+  # - 1e6
+  #- 1e7
+num_trials: 1
+midnight: 2022-06-02
+protocol_name: Large_Malicious_Bell
+protocol_location_client: agent.BellNew.BellClientAgent
+protocol_location_server: agent.BellNew.BellServiceAgent
+default_computation_delay: 5
+params:
+  dropout_fraction: 0.05
+  num_rounds: 5
+  malicious: false
+  client_bandwidth: 10000000     # in megabits per second
+  server_bandwidth: 10000000
+
+
+
+# Run High latency Malicious (DONE)
+# Run High latency Semi 
+# Run Bandwidth experiments => Low Server, Low Client (Malicious and Semi)
+######
+
+# Rerun Low Latency Bell and Acorn
+
+# Acorn and Bell => Large Malicious
+# High_Latency_Acorn_20-17-49_10-08-2023.csv => Just one result
+# Low_Server_Bandwidth_Malicious_Acorn
+
+# Large_Malicious_Bell
+# Large_Malicious_Acorn => 10000 still running

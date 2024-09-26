@@ -1,8 +1,9 @@
-from agent.AggregationAgent import AggregationClient, DropoutAggregationServer
+from olympia.agent.AggregationAgent import AggregationClient, DropoutAggregationServer
 from nacl.public import PrivateKey, Box
-import util.shamir_sharing as shamir
+import olympia.util.shamir_sharing as shamir
+import numpy as np
 
-from util import util
+from olympia.util import util
 from collections import defaultdict
 
 class ShamirClientAgent(AggregationClient):
@@ -10,14 +11,16 @@ class ShamirClientAgent(AggregationClient):
         self.GF = self.params['gf']
         self.random_state = self.params['random_state']
 
-        if round_number == 1:                   # generate keys
-            self.sk_u = PrivateKey.generate()
-            self.pk_u = self.sk_u.public_key
+        if round_number == 1:   
+            if self.params['malicious']:
+                self.sk_u, self.pk_u, self.signed_pk_u = self.generate_keys(
+                    self.params['signing_key'])
+            else:
+                self.sk_u, self.pk_u, self.signed_pk_u = self.generate_keys()               # generate keys
             return self.pk_u
 
         elif round_number == 2:                 # generate encrypted secret shares
-            client_value = self.GF(self.random_state.randint(low = 0, high = 100,
-                                                             size=self.params['dim']))
+            client_value = self.GF(np.ones(self.params['dim'], dtype=int))
             self.pks = message
             n_range = list(sorted(self.pks.keys()))
             shares = shamir.share_array(client_value, n_range, len(n_range)//2, self.GF)
@@ -34,7 +37,7 @@ class ShamirClientAgent(AggregationClient):
 
 
 class ShamirServiceAgent(DropoutAggregationServer):
-    dropout_fraction = 0.05
+    # dropout_fraction = 0.05
 
     def round(self, round_number, messages):
         self.GF = self.params['gf']

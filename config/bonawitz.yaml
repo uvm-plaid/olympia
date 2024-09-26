@@ -3,22 +3,30 @@ num_clients:
   - 16
   - 32
   - 128 
-  - 64 
+  # - 64 
   
 dims:
-  - 1e1
+  # - 1e1
   - 1e2
-  - 1e3
-  - 1e4
-  - 1e5
-  - 1e6
-  - 1e7 
-num_trials: 4
+  # - 1e3
+  # - 1e4
+  # - 1e5
+  # - 1e6
+  # - 1e7 
+num_trials: 2
 midnight: 2022-06-02
-protocol_name: Low_Latency_Bonawitz_final
+protocol_name: Malicious_Bonawitz #Low_Client_Bandwidth_Bonawitz
 protocol_location_client: agent.Bonawitz.BonawitzClientAgent
 protocol_location_server: agent.Bonawitz.BonawitzServiceAgent
 default_computation_delay: 5
 params:
   s_len: 10
   k: 3
+  dropout_fraction: 0.05
+  num_rounds: 6
+  malicious: true
+  client_bandwidth: 10000000     # in megabits per second
+  server_bandwidth: 10000000 #1 #100
+
+
+# Run for low server => not malicious => LAST SET EXPERIMENTS

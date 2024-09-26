@@ -10,9 +10,11 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from Kernel import Kernel
-from util import util
+from olympia.Kernel import Kernel
+from olympia.util import util
 from pathlib import Path
+
+from nacl.signing import SigningKey
 
 
 class BaseConfig():
@@ -89,8 +91,15 @@ class BaseConfig():
         self.participant_configurations = itertools.product(self.num_clients, self.dims, self.num_trials)
     
     def run_config(self):
-        latency_file = 'latencys.npy'
-        for num_clients, dim, trial_num in self.participant_configurations:
+        latency_file = 'latency.npy'
+        configs = list(self.participant_configurations)
+
+        # add an extra copy of the first config for the warm-up run
+        warming_up = True
+        first_config = configs[0]
+        configs.insert(0, first_config)
+
+        for num_clients, dim, trial_num in configs:
             print("==="*40)
             print(f"{self.protocol_name} Experiment {trial_num}: RUNNING FOR {num_clients} CLIENTS and {dim} Dimensions")
             dim = int(float(dim))
@@ -116,9 +125,13 @@ class BaseConfig():
             agent_types.extend([f"{self.protocol_name}ServiceAgent"])
             
             clients = []
+            signing_keys = {c: SigningKey.generate() for c in range(a, b)}
+            verification_keys = {c: signing_keys[c].verify_key for c in range(a, b)}
             for i in range(a, b):
                 self.params['random_state'] = np.random.RandomState(seed=np.random.randint(low=0,high=(2**32), dtype=np.int64))
-                clients.append(self.client_class(i, f"{self.protocol_name} Client Agent {i}", f"{self.protocol_name}ClientAgent", params = self.params))
+                self.params['signing_key'] = signing_keys[i]
+                self.params['verification_keys'] = verification_keys
+                clients.append(self.client_class(i, f"{self.protocol_name} Client Agent {i}", f"{self.protocol_name}ClientAgent", params = self.params.copy()))
                 
             agents.extend(clients)
             agent_types.extend([ f"{self.protocol_name}ClientAgent" for _ in range(a,b) ])
@@ -126,14 +139,15 @@ class BaseConfig():
             # latency = util.generate_latency_matrix(self.latency_table_df.sample(len(agent_types)))
 
             if Path(latency_file).exists():
+                print("\n ================= USING LATENCY MATRIX ================\n")
                 all_latency = np.load(latency_file)
                 latency = all_latency[:len(agent_types), :len(agent_types)] 
-
             else:
-                latency = np.full((len(agent_types), len(agent_types)), 5000000000)
-
+                print("\n ***************** CUSTOM LATENCY ****************\n")
+                latency = np.full((len(agent_types), len(agent_types)), 0) #1000000000)
+                
             noise = [ 0.25, 0.25, 0.20, 0.15, 0.10, 0.05 ]
-            print("Latency: ", latency)
+            # print("Latency: ", latency)
 
             kernel.runner(agents = agents, startTime = self.midnight, stopTime = self.midnight + pd.Timedelta('100:00:00'),
                     agentLatency = latency, latencyNoise = noise,
@@ -143,8 +157,13 @@ class BaseConfig():
             stats = util.build_stats(server, clients, kernel)
             print(stats)
             dropout_wait = 0
-            if not self.args.no_save:
+            if not self.args.no_save and not warming_up:
                 util.write_csv(self.result_filename, stats, num_clients, dim, dropout_wait)
+
+            if warming_up:
+                warming_up = False
+                print('***** WARM-UP RUN FINISHED')
+
         print("RESULT FINAL NAME: ", self.result_filename)
         # QUESTION: Should This Be System End Time?
         print("*****SYSTEM START_TIME", self.system_start_time)
@@ -154,10 +173,10 @@ class BaseConfig():
 # Helper function to get a reference to the correct class based off of a string
 # https://stackoverflow.com/questions/452969/does-python-have-an-equivalent-to-java-class-forname
 def get_class( kls ):
-    parts = kls.split('.')
+    parts = ['olympia'] + kls.split('.')
     module = ".".join(parts[:-1])
     m = __import__( module )
     for comp in parts[1:]:
-        m = getattr(m, comp)            
+        m = getattr(m, comp)
     return m
 

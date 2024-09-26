@@ -4,7 +4,7 @@ import importlib
 
 from pick import pick
 
-from config.base_config import BaseConfig
+from olympia.config.base_config import BaseConfig
 
 
 if __name__ == '__main__':

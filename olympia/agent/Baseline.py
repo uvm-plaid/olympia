@@ -1,16 +1,16 @@
-from agent.AggregationAgent import AggregationClient, DropoutAggregationServer
+from olympia.agent.AggregationAgent import AggregationClient, DropoutAggregationServer
+import numpy as np 
 
 class BaselineClientAgent(AggregationClient):
     def round(self, round_number, message):
         if round_number == 1:
-            GF = self.params['gf']
+            self.GF = self.params['gf']
             self.random_state = self.params['random_state']
-            client_value = GF(self.random_state.randint(low = 0, high = 100,
-                                                        size=self.params['dim']))
+            client_value = self.GF(np.ones(self.params['dim'], dtype=int))
             return client_value
 
 class BaselineServiceAgent(DropoutAggregationServer):
-    dropout_fraction = 0.05
+    # dropout_fraction = 0.05
 
     def round(self, round_number, messages):
         if round_number == 1:
