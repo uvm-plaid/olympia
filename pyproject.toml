@@ -7,16 +7,14 @@ build-backend = "setuptools.build_meta"
 name = "olympia"
 description = "Olympia: a simulator for secure aggregation"
 authors = [{name = "Ivoline Ngong"}]
-version = "0.1"
+version = "0.2"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.9,<=3.11.7"
-dependencies = [
-  "numpy>=1.16.2",
-]
+dependencies = []
 
 [project.urls]
 Repository = "https://github.com/uvm-plaid/olympia"
 
 [tool.setuptools]
-packages = ["olympia"]
+packages = ["olympia", "olympia.config", "olympia.agent", "olympia.message", "olympia.util"]
