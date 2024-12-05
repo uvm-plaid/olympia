@@ -265,7 +265,7 @@ def build_stats(server, clients, kernel):
     failure                    = server.failure
     dropoutFraction           = server.total_dropout_fraction
     serverRoundTimes           = server.server_round_times
-    avgClientRoundRimes        = np.mean([c.client_round_times for c in clients])
+    avgClientRoundRimes        = np.mean([c.client_round_times for c in survived_clients_list])
 
     return {
         'avg client computation time (ms)': avgClientComputationTime,

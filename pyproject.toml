@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 name = "olympia"
 description = "Olympia: a simulator for secure aggregation"
 authors = [{name = "Ivoline Ngong"}]
-version = "0.3"
+version = "0.3.1"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.8,<=3.12.4"
